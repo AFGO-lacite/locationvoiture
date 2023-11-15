@@ -8,7 +8,7 @@ import database from "../connexion.js"
 
 
 // Modèle Client
-const Client = database.define('Client', {
+const Client = database.define('Clients', {
     nom: {
         type: DataTypes.STRING,
         allowNull: false

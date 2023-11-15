@@ -3,6 +3,7 @@ import {Employe} from "../models/relation.js";
 import {Role} from "../models/relation.js"; 
 import {SecurSalle} from "../models/relation.js"; 
 import bcrypt from 'bcryptjs'
+import ValidationUtilisateur from "../validation/ValidationEmploye.js";
 
 
 // Lister tous les Employes avec leurs Rôles et SecurSalles
@@ -19,8 +20,14 @@ export const lister_employes = async (req, res) => {
 
 // Ajouter un Employe
 export const ajouter_employe = async (req, res) => {
+    const { Nom, Prenom, Naissance, Telephone, Email, Mot_De_Passe, Photo, RoleId, SecurSalleId } = req.body;
+    const errors=ValidationUtilisateur(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
+   
     try {
-        const { Nom, Prenom, Naissance, Telephone, Email, Mot_De_Passe, Photo, RoleId, SecurSalleId } = req.body;
+        
         
         const mdpCrypte=bcrypt.hashSync(Mot_De_Passe,10)
         const nouvelEmploye = await Employe.create({ 
