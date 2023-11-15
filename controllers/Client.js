@@ -2,6 +2,7 @@
 import {Client} from "../models/relation.js"; 
 import {Reservation} from "../models/relation.js"; 
 
+import validerClient from "../validation/ValidationClient.js";
 import bcrypt from 'bcryptjs'
 
 // Lister tous les Clients
@@ -19,10 +20,16 @@ export const lister_clients = async (req, res) => {
 
 // Ajouter un Client
 export const ajouter_client = async (req, res) => {
+    
+    const { nom, prenom, dateDeNaissance, email, motDePasse, photo, telephone, adressePostale, numeroDePermis } = req.body;
+        const errorsss= validerClient(req.body)
+        if (errorsss !== true) {
+            return res.status(400).json({ errorsss });  
+        }
     try {
-        const { nom, prenom, dateDeNaissance, email, motDePasse, photo, telephone, adressePostale, numeroDePermis } = req.body;
+        
         const mdpCrypte=bcrypt.hashSync(motDePasse,10)
-
+        
         
         const nouveauClient = await Client.create({ nom, prenom, dateDeNaissance, email, motDePasse:mdpCrypte, photo, telephone, adressePostale, numeroDePermis });
         res.status(201).json(nouveauClient);
