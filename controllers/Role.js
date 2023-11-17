@@ -1,6 +1,7 @@
 // Importation des modèles nécessaires
 import {Role} from "../models/relation.js"; 
 import {Employe} from "../models/relation.js"; 
+import validerRole from "../validation/ValidationRole.js";
 
 // Lister tous les Roles
 export const lister_roles = async (req, res) => {
@@ -14,8 +15,12 @@ export const lister_roles = async (req, res) => {
 
 // Ajouter un Role
 export const ajouter_role = async (req, res) => {
+    const { Nom_Du_Role } = req.body;
+    const errors=validerRole(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { Nom_Du_Role } = req.body;
         const nouveauRole = await Role.create({ Nom_Du_Role });
         res.status(201).json(nouveauRole);
     } catch (error) {
@@ -25,9 +30,14 @@ export const ajouter_role = async (req, res) => {
 
 // Modifier un Role et renvoyer la liste des Employes affectés
 export const modifier_role = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+    const errors=validerRole(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { id } = req.params;
-        const updates = req.body;
+       
         const role = await Role.findByPk(id, {
             include: [Employe]
         });

@@ -1,4 +1,5 @@
 import {Parking, Voiture, SecurSalle } from "../models/relation.js";
+import validerVoiture from "../validation/ValidationVoiture.js";
 
 
 export const liste_voiture = async (req, res) => {
@@ -19,8 +20,17 @@ export const liste_voiture = async (req, res) => {
 
 export const ajout_voiture = async(req,res)=>{
     const {id,Marque,Modele,Type_de_voiture,Annee_de_fabrication,Disponibilite,Prix_par_jour,ParkingCouleurDuParking}=req.body
-    const voiture={id,Marque,Modele,Type_de_voiture,Annee_de_fabrication,Disponibilite,Prix_par_jour,ParkingCouleurDuParking}
+
+    const errors=validerVoiture(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try{
+        const voiture={id,Marque,Modele,Type_de_voiture,Annee_de_fabrication,Disponibilite,Prix_par_jour,ParkingCouleurDuParking}
+        const voitureExistante = await Voiture.findByPk(id);
+        if (voitureExistante) {
+            return res.status(400).json({ error: "Cet ID est déjà attribué." });
+        }
         const resultat = await Voiture.create(voiture)
         res.status(200).json({ message:"Voiture ajoutée" })
     }

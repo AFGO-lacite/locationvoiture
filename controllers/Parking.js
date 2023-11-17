@@ -1,6 +1,7 @@
 // Importation des modèles nécessaires
 import {Parking} from "../models/relation.js"; 
 import {SecurSalle} from "../models/relation.js";
+import validerParking from "../validation/ValidationParking.js";
 
 // Lister tous les Parkings
 export const lister_parkings = async (req, res) => {
@@ -16,8 +17,17 @@ export const lister_parkings = async (req, res) => {
 
 // Ajouter un Parking
 export const ajouter_parking = async (req, res) => {
+    const { couleurDuParking, SecurSalleId } = req.body;
+    const errors=validerParking(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
+
     try {
-        const { couleurDuParking, SecurSalleId } = req.body;
+        const parkingExistante = await Parking.findOne({ where: { couleurDuParking } });
+        if (parkingExistante) {
+            return res.status(400).json({ error: "Cette couleur de parking est déjà attribuée." });
+        }
         const nouveauParking = await Parking.create({ couleurDuParking, SecurSalleId });
         res.status(201).json(nouveauParking);
     } catch (error) {
@@ -27,9 +37,14 @@ export const ajouter_parking = async (req, res) => {
 
 // Modifier un Parking
 export const modifier_parking = async (req, res) => {
+    const { couleurDuParking } = req.params;
+    const updates = req.body;
+    const errors=validerParking(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { couleurDuParking } = req.params;
-        const updates = req.body;
+        
         const parking = await Parking.findByPk(couleurDuParking);
         if (!parking) {
             return res.status(404).json({ message: "Parking non trouvé" });

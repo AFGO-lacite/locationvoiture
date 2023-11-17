@@ -1,6 +1,7 @@
 import {Reservation } from "../models/relation.js";
 import {Voiture} from "../models/relation.js"
 import{Client} from "../models/relation.js"
+import validerReservation from "../validation/ValidationReservation.js";
 
 
 // Liste des Réservations avec Détails Client et Voiture
@@ -18,7 +19,11 @@ export const liste_reservations = async (req, res) => {
 // Ajout d'une Réservation avec Vérification de la Disponibilité de la Voiture
 export const ajout_reservation = async (req, res) => {
     const { ClientId, VoitureId, Date_de_debut_de_la_reservation, Date_de_fin_de_la_reservation, ...autresDetails } = req.body;
-  
+    const errors= validerReservation(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
+
     try {
         // Récupérer les informations du client et de la voiture
         const client = await Client.findByPk(ClientId);
@@ -67,6 +72,10 @@ export const ajout_reservation = async (req, res) => {
 export const modifier_reservation = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
+    const errors= validerReservation(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
         const reservation = await Reservation.findByPk(id);
         if (!reservation) {

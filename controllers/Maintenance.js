@@ -2,6 +2,7 @@
 import {Maintenance} from "../models/relation.js"; 
 import {Voiture} from "../models/relation.js"; 
 import {GarageDeMaintenance} from "../models/relation.js"; 
+import validerMaintenance from "../validation/ValidationMaintenance.js";
 
 // Lister toutes les Maintenances
 export const lister_maintenances = async (req, res) => {
@@ -17,8 +18,14 @@ export const lister_maintenances = async (req, res) => {
 
 // Ajouter une Maintenance
 export const ajouter_maintenance = async (req, res) => {
+    const { TypeDeMaintenance, DateDeDebut, DateDeFin, VoitureId, GarageDeMaintenanceId } = req.body;
+    const errors=validerMaintenance(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
+    
+    
     try {
-        const { TypeDeMaintenance, DateDeDebut, DateDeFin, VoitureId, GarageDeMaintenanceId } = req.body;
         const nouvelleMaintenance = await Maintenance.create({ 
             TypeDeMaintenance, 
             DateDeDebut, 
@@ -34,9 +41,15 @@ export const ajouter_maintenance = async (req, res) => {
 
 // Modifier une Maintenance
 export const modifier_maintenance = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const errors=validerMaintenance(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { id } = req.params;
-        const updates = req.body;
+        
         const maintenance = await Maintenance.findByPk(id);
         if (!maintenance) {
             return res.status(404).json({ message: "Maintenance non trouvée" });

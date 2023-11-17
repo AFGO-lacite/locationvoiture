@@ -4,6 +4,7 @@ import {Reservation} from "../models/relation.js";
 import {Voiture} from "../models/relation.js"; 
 import {Employe} from "../models/relation.js"; 
 import{Client}from"../models/relation.js";
+import validerLivraison from "../validation/ValidationLivraison.js";
 
 // Lister toutes les Livraisons
 export const lister_livraisons = async (req, res) => {
@@ -19,8 +20,12 @@ export const lister_livraisons = async (req, res) => {
 
 // Ajouter une Livraison
 export const ajouter_livraison = async (req, res) => {
+    const { dateLivraison, adresseLivraison, heureLivraison, ReservationId, VoitureId, EmployeId, ClientId } = req.body;
+    const errors=validerLivraison(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { dateLivraison, adresseLivraison, heureLivraison, ReservationId, VoitureId, EmployeId, ClientId } = req.body;
 
         // Vérifier si la réservation existe
         const reservation = await Reservation.findByPk(ReservationId);
@@ -58,9 +63,14 @@ export const ajouter_livraison = async (req, res) => {
 
 // Modifier une Livraison
 export const modifier_livraison = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+    const errors=validerLivraison(req.body)
+    if (errors !== true) {
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { id } = req.params;
-        const updates = req.body;
+        
         const livraison = await Livraison.findByPk(id);
         if (!livraison) {
             return res.status(404).json({ message: "Livraison non trouvée" });

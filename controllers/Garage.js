@@ -1,5 +1,7 @@
 // Importation du modèle GarageDeMaintenance
 import { GarageDeMaintenance } from "../models/relation.js";
+import { ExpressValidator } from "express-validator";
+import validerGarage from "../validation/ValidationGarage.js";
 
 // Lister tous les Garages de Maintenance
 export const lister_garages = async (req, res) => {
@@ -13,8 +15,14 @@ export const lister_garages = async (req, res) => {
 
 // Ajouter un Garage de Maintenance
 export const ajouter_garage = async (req, res) => {
+    const { nomDuGarage, adresse } = req.body;
+    const errors=validerGarage(req.body)
+    if(errors!==true){
+        return res.status(400).json({ errors });  
+    }
+    
     try {
-        const { nomDuGarage, adresse } = req.body;
+        
         const nouveauGarage = await GarageDeMaintenance.create({ nomDuGarage, adresse });
         res.status(201).json(nouveauGarage);
     } catch (error) {
@@ -24,9 +32,14 @@ export const ajouter_garage = async (req, res) => {
 
 // Modifier un Garage de Maintenance
 export const modifier_garage = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+    const errors=validerGarage(req.body)
+    if(errors!==true){
+        return res.status(400).json({ errors });  
+    }
     try {
-        const { id } = req.params;
-        const updates = req.body;
+        
         const garage = await GarageDeMaintenance.findByPk(id);
         if (!garage) {
             return res.status(404).json({ message: "Garage de Maintenance non trouvé" });
